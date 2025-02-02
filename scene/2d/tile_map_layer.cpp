@@ -846,6 +846,15 @@ void TileMapLayer::_physics_update_cell(CellData &r_cell_data) {
 
 						Transform2D xform;
 						xform.set_origin(tile_set->map_to_local(r_cell_data.coords));
+						if (transpose) {//Modify the transform's columns. This is necessary so rotated tiles with One-Way collision don't bug out
+							xform.set_rotation((real_t)Math_PI * 0.5f);
+						}
+						if (flip_v) {
+							xform.columns[1] *= -1;
+						}
+						if (flip_h) {
+							xform.columns[0] *= -1;
+						}
 						xform = gl_transform * xform;
 						ps->body_set_state(body, PhysicsServer2D::BODY_STATE_TRANSFORM, xform);
 
@@ -877,7 +886,7 @@ void TileMapLayer::_physics_update_cell(CellData &r_cell_data) {
 							int shapes_count = tile_data->get_collision_polygon_shapes_count(tile_set_physics_layer, polygon_index);
 							for (int shape_index = 0; shape_index < shapes_count; shape_index++) {
 								// Add decomposed convex shapes.
-								Ref<ConvexPolygonShape2D> shape = tile_data->get_collision_polygon_shape(tile_set_physics_layer, polygon_index, shape_index, flip_h, flip_v, transpose);
+								Ref<ConvexPolygonShape2D> shape = tile_data->get_collision_polygon_shape(tile_set_physics_layer, polygon_index, shape_index);//removed params: flip_h, flip_v, transpose);
 								ps->body_add_shape(body, shape->get_rid());
 								ps->body_set_shape_as_one_way_collision(body, body_shape_index, one_way_collision, one_way_collision_margin);
 
